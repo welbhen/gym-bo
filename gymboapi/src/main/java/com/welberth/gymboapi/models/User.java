@@ -1,5 +1,7 @@
 package com.welberth.gymboapi.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.Id;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -39,6 +41,7 @@ public class User {
     @Size(groups = CreateUser.class, min = 2, max = 100)
     private String username;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password", length = 50, nullable = false)
     @NotNull(groups = {CreateUser.class, UpdateUser.class})
     @NotEmpty(groups = {CreateUser.class, UpdateUser.class})
