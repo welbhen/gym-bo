@@ -7,26 +7,25 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Column;
+import javax.persistence.ManyToOne;
+import javax.persistence.JoinColumn;
 import javax.persistence.GenerationType;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
 @Table(name = User.TABLE_NAME)
 public class User {
-    public interface CreateUser {
-    }
+    public interface CreateUser { }
 
-    ;
+    public interface UpdateUser { }
 
-    public interface UpdateUser {
-    }
-
-    ;
+    public interface DeleteUser { }
 
     public static final String TABLE_NAME = "user";
 
@@ -36,8 +35,8 @@ public class User {
     private Long id;
 
     @Column(name = "username", length = 100, nullable = false, unique = true)
-    @NotNull(groups = CreateUser.class)
-    @NotEmpty(groups = CreateUser.class)
+    @NotNull(groups = {CreateUser.class, DeleteUser.class})
+    @NotEmpty(groups = {CreateUser.class, DeleteUser.class})
     @Size(groups = CreateUser.class, min = 2, max = 100)
     private String username;
 
@@ -54,18 +53,22 @@ public class User {
     @Size(groups = {CreateUser.class, UpdateUser.class}, min = 3, max = 100)
     private String email;
 
-    // TODO:
-    // private Plan activePlan = new Plan();
-    // private Plan previousPlan = new Plan();
+    @ManyToOne // Many Users to One Plan
+    @JoinColumn(name = "active_plan_id", nullable = false)
+    private Plan activePlan;
 
-    public User() {
-    }
+    @Column(name = "paid_until")
+    private LocalDate paidUntil;
 
-    public User(Long id, String username, String password, String email) {
+    public User() { }
+
+    public User(Long id, String username, String password, String email, Plan activePlan, LocalDate paidUntil) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
+        this.activePlan = activePlan;
+        this.paidUntil = paidUntil;
     }
 
     public Long getId() {
@@ -100,6 +103,22 @@ public class User {
         this.email = email;
     }
 
+    public Plan getActivePlan() {
+        return activePlan;
+    }
+
+    public void setActivePlan(Plan activePlan) {
+        this.activePlan = activePlan;
+    }
+
+    public LocalDate getPaidUntil() {
+        return paidUntil;
+    }
+
+    public void setPaidUntil(LocalDate paidUntil) {
+        this.paidUntil = paidUntil;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
@@ -117,6 +136,8 @@ public class User {
         return Objects.equals(this.id, other.id) &&
                 Objects.equals(this.username, other.username) &&
                 Objects.equals(this.password, other.password) &&
-                Objects.equals(this.email, other.email);
+                Objects.equals(this.email, other.email) &&
+                Objects.equals(this.activePlan, other.activePlan) &&
+                Objects.equals(this.paidUntil, other.paidUntil);
     }
 }
