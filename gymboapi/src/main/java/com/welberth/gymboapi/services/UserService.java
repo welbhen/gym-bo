@@ -93,7 +93,7 @@ public class UserService {
 //
 //    public boolean hasActivePlan(Long userId) throws ApiException {
 //        findById(userId);
-//        Plan activePlan = findActivePlan(id);
+//        Plan activePlan = findActivePlan(id); // TODO: Also check paid_until column
 //        // TODO: implement
 //    }
 //
