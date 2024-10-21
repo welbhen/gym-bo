@@ -35,8 +35,8 @@ public class User {
     private Long id;
 
     @Column(name = "username", length = 100, nullable = false, unique = true)
-    @NotNull(groups = {CreateUser.class, DeleteUser.class})
-    @NotEmpty(groups = {CreateUser.class, DeleteUser.class})
+    @NotNull(groups = CreateUser.class)
+    @NotEmpty(groups = CreateUser.class)
     @Size(groups = CreateUser.class, min = 2, max = 100)
     private String username;
 
