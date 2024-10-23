@@ -3,13 +3,14 @@ package com.welberth.gymboapi.services;
 import com.welberth.gymboapi.exceptions.ApiException;
 import com.welberth.gymboapi.models.Plan;
 import com.welberth.gymboapi.models.User;
-import com.welberth.gymboapi.repositories.PlanRepository;
 import com.welberth.gymboapi.repositories.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,12 +24,12 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private PlanRepository planRepository;
+    private PlanService planService;
 
     /**
      * Finds a user on the database by its id.
      *
-     * @param id id for the user
+     * @param id for the user
      * @return user corresponding to the id passed
      * @throws ApiException when user is not found
      */
@@ -36,6 +37,29 @@ public class UserService {
         Optional<User> user = this.userRepository.findById(id); // Optional -> means that if no User is found, it returns and empty obj instead of null
 
         return user.orElseThrow(() -> new ApiException("Could not find a User with id = " + id));
+    }
+
+    /**
+     * Finds a user on the database by its username.
+     *
+     * @param username for the user
+     * @return user corresponding to the id passed
+     * @throws ApiException when user is not found
+     */
+    public User findByUsername(String username) throws ApiException {
+        Optional<User> user = this.userRepository.findByUsername(username);
+
+        return user.orElseThrow(() -> new ApiException("Could not find a User with username = " + username));
+    }
+
+    /**
+     * Finds a list of Users subscribed to a Plan.
+     *
+     * @param planId plan id
+     * @return list of users that are subscribe to the Plan
+     */
+    public List<User> findByPlanId(Long planId) {
+        return this.userRepository.findByPlan_Id(planId);
     }
 
     /**
@@ -85,26 +109,67 @@ public class UserService {
         }
     }
 
+    /**
+     * Finds the Plan that a User is subscribed to.
+     *
+     * @param userId user id
+     * @return the plan this user is subscribed to
+     * @throws ApiException if user is not subscribed to any plan
+     */
+    public Plan findActivePlan(Long userId) throws ApiException {
+        User user = findById(userId);
 
-//    public Plan findActivePlan(Long userId) throws ApiException {
-//        findById(userId);
-//        // TODO: implement
-//    }
-//
-//    public boolean hasActivePlan(Long userId) throws ApiException {
-//        findById(userId);
-//        Plan activePlan = findActivePlan(id); // TODO: Also check paid_until column
-//        // TODO: implement
-//    }
-//
-//    public Plan subscribeToPlan(Long userId, Long planId) throws ApiException {
-//        findById(userId);
-//        // TODO: implement
-//    }
-//
-//    public void unsubscribeToPlan(Long userId) throws ApiException {
-//        findById(userId);
-//
-//        // TODO: implement
-//    }
+        try {
+            return user.getActivePlan();
+        } catch (Exception e) {
+            throw new ApiException("No Plan subscription found for the user " + user.getUsername() + ".");
+        }
+    }
+
+    /**
+     * Checks if the User is up-to-date with Plan Subscription payment.
+     *
+     * @param userId user id
+     * @return true if user is up-to-date with payment, false otherwise
+     */
+    public boolean isPaymentUpToDate(Long userId) {
+        findActivePlan(userId); // Checks if user has an Active plan, if not an exception will be thrown
+        User user = findById(userId);
+
+        LocalDate paidUntil = user.getPaidUntil();
+        LocalDate today = LocalDate.now();
+
+        return paidUntil.isAfter(today);
+    }
+
+    /**
+     * Subscribes a User to a Plan.
+     *
+     * @param userId    id for the user
+     * @param planId    the plan this user wants to subscribe to
+     * @param paidUntil until what date this user is subscribed to this plan
+     */
+    public void subscribeToPlan(Long userId, Long planId, LocalDate paidUntil) {
+        User user = findById(userId);
+        Plan plan = this.planService.findById(planId);
+
+        user.setActivePlan(plan);
+        user.setPaidUntil(paidUntil);
+
+        updateUser(user);
+    }
+
+    /**
+     * Unsubscribes a User to a Plan.
+     *
+     * @param userId id for the user
+     */
+    public void unsubscribeToPlan(Long userId) {
+        User user = findById(userId);
+
+        user.setActivePlan(null);
+        user.setPaidUntil(null);
+
+        updateUser(user);
+    }
 }
