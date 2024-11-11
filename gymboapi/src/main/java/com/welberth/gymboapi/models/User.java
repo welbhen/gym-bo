@@ -54,20 +54,20 @@ public class User {
     private String email;
 
     @ManyToOne // Many Users to One Plan
-    @JoinColumn(name = "active_plan_id", nullable = false)
-    private Plan activePlan;
+    @JoinColumn(name = "plan_id", nullable = false)
+    private Plan plan;
 
     @Column(name = "paid_until")
     private LocalDate paidUntil;
 
     public User() { }
 
-    public User(Long id, String username, String password, String email, Plan activePlan, LocalDate paidUntil) {
+    public User(Long id, String username, String password, String email, Plan plan, LocalDate paidUntil) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
-        this.activePlan = activePlan;
+        this.plan = plan;
         this.paidUntil = paidUntil;
     }
 
@@ -103,12 +103,12 @@ public class User {
         this.email = email;
     }
 
-    public Plan getActivePlan() {
-        return activePlan;
+    public Plan getPlan() {
+        return plan;
     }
 
-    public void setActivePlan(Plan activePlan) {
-        this.activePlan = activePlan;
+    public void setPlan(Plan plan) {
+        this.plan = plan;
     }
 
     public LocalDate getPaidUntil() {
@@ -137,7 +137,7 @@ public class User {
                 Objects.equals(this.username, other.username) &&
                 Objects.equals(this.password, other.password) &&
                 Objects.equals(this.email, other.email) &&
-                Objects.equals(this.activePlan, other.activePlan) &&
+                Objects.equals(this.plan, other.plan) &&
                 Objects.equals(this.paidUntil, other.paidUntil);
     }
 }
