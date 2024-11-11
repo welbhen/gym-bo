@@ -116,11 +116,11 @@ public class UserService {
      * @return the plan this user is subscribed to
      * @throws ApiException if user is not subscribed to any plan
      */
-    public Plan findActivePlan(Long userId) throws ApiException {
+    public Plan findPlan(Long userId) throws ApiException {
         User user = findById(userId);
 
         try {
-            return user.getActivePlan();
+            return user.getPlan();
         } catch (Exception e) {
             throw new ApiException("No Plan subscription found for the user " + user.getUsername() + ".");
         }
@@ -133,7 +133,7 @@ public class UserService {
      * @return true if user is up-to-date with payment, false otherwise
      */
     public boolean isPaymentUpToDate(Long userId) {
-        findActivePlan(userId); // Checks if user has an Active plan, if not an exception will be thrown
+        findPlan(userId); // Checks if user has an Active plan, if not an exception will be thrown
         User user = findById(userId);
 
         LocalDate paidUntil = user.getPaidUntil();
@@ -145,15 +145,15 @@ public class UserService {
     /**
      * Subscribes a User to a Plan.
      *
-     * @param userId    id for the user
-     * @param planId    the plan this user wants to subscribe to
+     * @param userId id for the user
+     * @param planId the plan this user wants to subscribe to
      * @param paidUntil until what date this user is subscribed to this plan
      */
     public void subscribeToPlan(Long userId, Long planId, LocalDate paidUntil) {
         User user = findById(userId);
         Plan plan = this.planService.findById(planId);
 
-        user.setActivePlan(plan);
+        user.setPlan(plan);
         user.setPaidUntil(paidUntil);
 
         updateUser(user);
@@ -167,7 +167,7 @@ public class UserService {
     public void unsubscribeToPlan(Long userId) {
         User user = findById(userId);
 
-        user.setActivePlan(null);
+        user.setPlan(null);
         user.setPaidUntil(null);
 
         updateUser(user);

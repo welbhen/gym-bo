@@ -49,7 +49,7 @@ public class Plan {
     @Size(groups = {CreatePlan.class, UpdatePlan.class}, min = 1)
     private Float monthlyPrice;
 
-    @OneToMany(mappedBy = "activePlan") // User class property that maps which User has a said Plan
+    @OneToMany(mappedBy = "plan") // User class property that maps which User has a said Plan
     private List<User> users = new ArrayList<User>();
 
     public Plan() { }
